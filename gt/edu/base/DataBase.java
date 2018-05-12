@@ -5,8 +5,8 @@ import java.util.*;
 
 public class DataBase {
 
-	final static String declaracion="C:/Users/Rosy Perez/Desktop/java/datos1.txt";
-	final static String datos="C:/Users/Rosy Perez/Desktop/java/datos2.txt";
+	final static String declaracion="datos1.txt";
+	final static String datos="datos2.txt";
 	static Scanner captura = new Scanner(System.in);
 	File fconfig = new File(declaracion);
 	
@@ -44,7 +44,7 @@ public class DataBase {
 			
 			op=captura.nextByte();
 			switch(op) {
-				case 1://crea archivo de configuracion
+				case 1:
 					System.out.println(".....");
 					if(validarFile()) {
 						System.out.println("Ocurrio un error");
@@ -52,12 +52,14 @@ public class DataBase {
 						registrarCampos();
 					}
 					break;
-				case 2://crea un nuevo registro
+				case 2:
 					leerConfig();
 					break;
 				case 3:
+					System.out.println("Ingrese un campo con tipo de dato Entero");
+					buscar(captura.nextInt());
 					break;
-				case 4://listar registros, no se me ocurre como
+				case 4:
 					leerConfig();
 					break;
 				case 5:
@@ -158,6 +160,7 @@ public class DataBase {
 				String texto = captura.nextLine();
 				texto(texto);
 			}else if(op==4){
+				System.out.println("\tRegistros Almacenados");
 				leeTexto();
 			}
 			break;
@@ -232,11 +235,14 @@ public class DataBase {
 			DataInputStream dain = new DataInputStream(new FileInputStream(datos));
 			try {
 				do {
-					String no = dain.readUTF();
-					System.out.println(no);
+					System.out.println("|------------------------------------|\n");
+					System.out.println("\t"+n+": "+dain.readUTF());
+					System.out.println("\t"+dain.readInt());
+					System.out.println("\t"+dain.readFloat());
+				
 				}while(true);
 			} catch (IOException f) {
-				//f.printStackTrace();
+				System.out.println("\tFinalizacion de Registros");
 			}
 			dain.close();
 		} catch (IOException e) {
@@ -260,4 +266,32 @@ public class DataBase {
 			e.printStackTrace();
 		} 
 	}
+	
+	public void buscar(int entero) {
+		int da;
+		String nombre;
+		float decimal;
+		try {
+			DataInputStream dain = new DataInputStream(new FileInputStream(declaracion));
+			try {
+				do {
+				     da = dain.readInt();
+				     nombre = dain.readUTF();
+				     decimal = dain.readFloat();
+					if(entero == da) {
+						System.out.println("\t"+nombre);
+						System.out.println("\t"+da);
+						System.out.println("\t"+decimal);
+					}
+				}while(da != entero);
+			} catch (IOException f) {
+				System.out.println("Registro no existe");
+			}
+			dain.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} 
+	}
+	
+}
 }
