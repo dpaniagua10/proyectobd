@@ -3,10 +3,12 @@ package gt.edu.base;
 import java.io.*;
 import java.util.*;
 
+
 public class DataBase {
 
 	final static String declaracion="C:/Users/Rosy Perez/Desktop/java/datos1.txt";
-	final static String datos="C:/Users/Rosy Perez/Desktop/java/datos2.txt";
+	final static String entidad = "C:/Users/Rosy Perez/Desktop/java/";
+	final static String datos="C:/Users/Rosy Perez/Desktop/java/datos2.txt";//variable entidad
 	static Scanner captura = new Scanner(System.in);
 	File fconfig = new File(declaracion);
 	
@@ -78,6 +80,10 @@ public class DataBase {
 	
 	public void registrarCampos() {
 		
+		/*System.out.println("Ingrese el nombre de la entidad: ");
+		String entidad = captura.nextLine();
+		*/
+		
 		System.out.println("Ingrese la cantidad de campos ");
 		int n=captura.nextInt();
 		Valores x = new Valores();
@@ -85,9 +91,9 @@ public class DataBase {
 			
 			lista.clear();
 			captura.nextLine();
-			System.out.println("Ingrese el nombre del campo: ");
+			System.out.println("\n Ingrese el nombre del campo: ");
 			x.setNombre(captura.nextLine());
-			System.out.println("Seleccione tipo de dato: ");
+			System.out.println("\n Seleccione tipo de dato: ");
 			mostrar();
 			x.setDato(captura.nextShort());
 			lista.add(x);
@@ -99,12 +105,12 @@ public class DataBase {
 	
 	public void mostrar() {
 		
-		System.out.println("1. Alfanumerico ");
-		System.out.println("2. Entero ");
-		System.out.println("3. Decimal ");
-		System.out.println("4. Verdadero/Falso ");
-		System.out.println("5. Fecha dd/mm/aaaa ");
-		System.out.println("6. Moneda Q ");
+		System.out.println("1. Alfanumerico ");//string
+		System.out.println("2. Entero ");//int
+		System.out.println("3. Decimal ");//float
+		System.out.println("4. Verdadero/Falso ");//boolean
+		System.out.println("5. Fecha dd/mm/aaaa ");//fecha de nuestra clase fecha
+		System.out.println("6. Moneda Q ");// float con signo de Quetzal
 		
 	}
 	
@@ -129,14 +135,63 @@ public class DataBase {
 			DataInputStream dain = new DataInputStream(new FileInputStream(declaracion));
 			try {
 				do {
-					n = dain.readUTF();
-					d = dain.readShort();
+					n = dain.readUTF();//nombre del campo
+					d = dain.readShort();//identificador de la variable
+					
 					if(op==2) {// segun la opcion seleccionada en el menu principal evalua si es escribir o leer
 						System.out.print("Ingrese "+n+": ");
 						//System.out.println("Ingrese ");
 						verConfig(d);//se llama la funcion para escribir se pasa el identificador d
 					}else if(op==4){
-						verConfig(d);
+						//verConfig(d);
+						try {
+							dain = new DataInputStream(new FileInputStream(datos));
+							try {
+								do {
+									switch(d) {
+									case 1:
+										String nn = dain.readUTF();
+										System.out.println(nn);
+										break;
+									case 2:
+										int nm = dain.readInt();
+										System.out.println(nm);
+										break;
+									case 3:
+										float nw = dain.readFloat();
+										System.out.println(nw);
+										break;
+									case 4:
+										boolean nq = dain.readBoolean();
+										System.out.println(nq);
+										break;
+									case 5:
+										String ns = dain.readUTF();
+										System.out.println(ns);
+										break;
+									case 6:
+										float nd = dain.readFloat();
+										System.out.println("Q "+nd);
+										break;
+									default:
+										break;
+									}
+								}while(true);
+								
+							} catch (IOException f) {
+								//f.printStackTrace();
+							}
+							
+						} catch (IOException e) {
+							e.printStackTrace();
+						} finally {
+							try {
+								dain.close();
+							} catch (IOException e) {
+								e.printStackTrace();
+							}
+						}
+						
 					}
 					
 				}while(true);
@@ -154,11 +209,13 @@ public class DataBase {
 		switch(d) {
 		case 1://
 			if(op==2) {
+				System.out.println("Tipo de dato Alfanumerico");
+				captura.nextLine();
 				captura.nextLine();
 				String texto = captura.nextLine();
 				texto(texto);
 			}else if(op==4){
-				leeTexto();
+				//leeTexto();
 			}
 			break;
 		case 2:
@@ -167,26 +224,73 @@ public class DataBase {
 				int entero = captura.nextInt();
 				entero(entero);
 			}else if(op==4) {
+				//leeEntero();
+			}
+			break;
+		case 3:
+			if(op==2) {
+				System.out.println("Tipo de dato Decimal");
+				float decimal = captura.nextFloat();
+				decimal(decimal);
+			}else if(op==4){
+				//leeDecimal();
+			}
+			break;
+		case 4:
+			if(op==2) {
+				System.out.println("Tipo de dato F/V");
+				captura.nextLine();
+				String log = captura.nextLine();
+				boolean sino = false;
 				
+				if(log.equals("v")) {
+					sino = true;
+					sino(sino);
+				}else if(log.equals("f")) {
+					sino(sino);
+				}
+			}else if(op==4) {
+				//leeSino();
 			}
 			
 			break;
-		case 3:
-			float decimal = captura.nextFloat();
-			decimal(decimal);
-			break;
-		case 4:
-			boolean sino = captura.nextBoolean();
-			sino(sino);
-			break;
 		case 5:
+			if(op==2) {
+				System.out.println("Tipo de dato Fecha (31/12/2000): ");
+				int dia = captura.nextInt();
+				int mes = captura.nextInt();
+				int anio = captura.nextInt();
+				Fecha f1 = new Fecha(dia,mes,anio);
+				String fecha = f1.toString();
+				fecha(fecha);
+			}else if(op==4) {
+				//leeTexto();
+			}
 			break;
 		case 6:
-			break;
+			if(op==2) {
+				System.out.println("Ingrese tipo de dato Moneda Q");
+				float moneda = captura.nextFloat();
+				decimal(moneda);
+				break;
+			}else if(op==4) {
+				//leeDecimal();
+			}
 		}
 		
 	}
 
+	public void fecha(String fecha) {
+		try {
+			DataOutputStream dout = new DataOutputStream(new FileOutputStream(datos,true));
+			dout.writeUTF(fecha);
+			dout.close();
+		} catch (IOException e) {		
+			e.printStackTrace();
+		}
+		
+	}
+	
 	public void texto(String texto) {
 		try {
 			DataOutputStream dout = new DataOutputStream(new FileOutputStream(datos,true));
@@ -227,7 +331,7 @@ public class DataBase {
 		}		
 	}
 	
-	public void leeTexto() {
+	/*public void leeTexto() {
 		try {
 			DataInputStream dain = new DataInputStream(new FileInputStream(datos));
 			try {
@@ -238,7 +342,7 @@ public class DataBase {
 			} catch (IOException f) {
 				//f.printStackTrace();
 			}
-			dain.close();
+			//dain.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		} 
@@ -255,9 +359,43 @@ public class DataBase {
 			} catch (IOException f) {
 				//f.printStackTrace();
 			}
-			dain.close();
+			//dain.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		} 
 	}
+	
+	public void leeDecimal() {
+		try {
+			DataInputStream dain = new DataInputStream(new FileInputStream(datos));
+			try {
+				do {
+					float da = dain.readFloat();
+					System.out.println(da);
+				}while(true);
+			} catch (IOException f) {
+				//f.printStackTrace();
+			}
+			//dain.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} 
+	}
+	
+	public void leeSino() {
+		try {
+			DataInputStream dain = new DataInputStream(new FileInputStream(datos));
+			try {
+				do {
+					boolean da = dain.readBoolean();
+					System.out.println(da);
+				}while(true);
+			} catch (IOException f) {
+				//f.printStackTrace();
+			}
+			//dain.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} 
+	}*/
 }
