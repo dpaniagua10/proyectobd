@@ -8,7 +8,6 @@ public class DataBase {
 
 	final static String declaracion="C:/Users/Rosy Perez/Desktop/java/definicion.txt";//variables paniagua
 	final static String datos="C:/Users/Rosy Perez/Desktop/java/datos2.txt";
-	
 	/*final static String declaracion="definicion.txt";//variable otros
 	final static String datos="datos2.txt";*/
 	long pos = 0;
@@ -83,10 +82,9 @@ public class DataBase {
 						System.out.println("Archivo de definicion no existe ");
 					}
 					break;
-				case 4://listar registros, no se me ocurre como
+				case 4://listar registros,
 					if(validarFile()) {
-						
-						leerConfig();
+						leerLista();
 					}else {
 						System.out.println("Archivo de definicion no existe ");
 					}
@@ -108,9 +106,7 @@ public class DataBase {
 	}
 	
 	public void registrarCampos() {
-		/*System.out.println("Ingrese el nombre de la entidad: ");
-		String entidad = captura.nextLine();
-		*/
+
 		System.out.println("Ingrese la cantidad de campos ");
 		int n = 0;//captura.nextInt();
 		do{
@@ -133,7 +129,7 @@ public class DataBase {
 			x.setNombre(captura.nextLine());
 			System.out.println("\n Seleccione tipo de dato: ");
 			mostrar();
-			//x.setDato(captura.nextShort());
+
 			do{
 				try{
 					System.out.println("");
@@ -178,59 +174,22 @@ public class DataBase {
 	}
 	
 	public void leerConfig() {//lee el archivo de configuracion 
-		
-		boolean fin = false;
-		RandomAccessFile raf = null;
+
 		try {
 			DataInputStream dain = new DataInputStream(new FileInputStream(declaracion));
 			try {
 				do {
 					n = dain.readUTF();//nombre del campo
 					d = dain.readShort();//identificador del tipo de dato
-					
 					if(op==2) {// segun la opcion seleccionada en el menu principal evalua si es escribir o leer
 						System.out.print("Ingrese "+n+": ");
-						//System.out.println("Ingrese ");
 						verConfig(d);//se llama la funcion para escribir se pasa el identificador d
-					}else if(op==4){
-						File f = new File(datos);
-						raf = new RandomAccessFile(f,"r");
-						raf.seek(pos);
-						switch(d) {
-						case 1:
-							System.out.println(n+" : "+raf.readUTF());
-							pos = raf.getFilePointer();
-							break;
-						case 2:
-							System.out.println(n+" : "+raf.readInt());
-							pos = raf.getFilePointer();
-							break;
-						case 3:
-							System.out.println(n+" : "+raf.readFloat());
-							pos = raf.getFilePointer();
-							break;
-						case 4:
-							System.out.println(n+" : "+raf.readBoolean());
-							pos = raf.getFilePointer();
-							break;
-						case 5:
-							System.out.println(n+" : "+raf.readUTF());
-							pos = raf.getFilePointer();
-							break;
-						case 6:
-							System.out.println(n+" : "+"Q."+raf.readFloat());
-							pos = raf.getFilePointer();
-							break;
-						}
 					}
-					
 				}while(true);
 			} catch (IOException f) {
-				//f.printStackTrace();
-				fin = true;
+			
 			}
 			dain.close();
-			raf.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		} 
@@ -239,55 +198,42 @@ public class DataBase {
 	public void verConfig(short d) {//recibe el identificador d y evalua para solcitar el dato 
 		
 		switch(d) {
-		case 1://
-			if(op==2) {
-				System.out.println("Tipo de dato Alfanumerico");
-				String texto = captura.nextLine();
-				texto(texto);
-			}else if(op==4){
-				//leeTexto();
-			}
+		case 1://		
+			System.out.println("Tipo de dato Alfanumerico");
+			String texto = captura.nextLine();
+			texto(texto);
 			break;
 		case 2:
-			if(op==2) {
-				System.out.println("Tipo de dato Entero");
-				alerta = false;
-				int entero = 0;
-				do{
-					try{
-						System.out.println("");
-						entero = Integer.parseInt(captura.nextLine());
-						alerta = true;
-					}catch(NumberFormatException e){
-						System.out.println("Dato incorrecto");
-						alerta = false;
-					}
-				}while(!alerta);
-				
-				entero(entero);
-			}else if(op==4) {
-				//leeEntero();
-			}
+			System.out.println("Tipo de dato Entero");
+			alerta = false;
+			int entero = 0;
+			do{
+				try{
+					System.out.println("");
+					entero = Integer.parseInt(captura.nextLine());
+					alerta = true;
+				}catch(NumberFormatException e){
+					System.out.println("Dato incorrecto");
+					alerta = false;
+				}
+			}while(!alerta);	
+			entero(entero);
 			break;
 		case 3:
-			if(op==2) {
-				System.out.println("Tipo de dato Decimal");
-				alerta = false;
-				float decimal = 0;
-				do{
-					try{
-						System.out.println("");
-						decimal = Float.parseFloat(captura.nextLine());
-						alerta = true;
-					}catch(NumberFormatException e){
-						System.out.println( "Dato incorrecto");
-						alerta = false;
-					}
-				}while(!alerta);
-				decimal(decimal);
-			}else if(op==4){
-				//leeDecimal();
-			}
+			System.out.println("Tipo de dato Decimal");
+			alerta = false;
+			float decimal = 0;
+			do{
+				try{
+					System.out.println("");
+					decimal = Float.parseFloat(captura.nextLine());
+					alerta = true;
+				}catch(NumberFormatException e){
+					System.out.println( "Dato incorrecto");
+					alerta = false;
+				}
+			}while(!alerta);
+			decimal(decimal);
 			break;
 		case 4:
 			boolean sino = false;
@@ -307,7 +253,6 @@ public class DataBase {
 				}
 				
 			}while(!alerta);
-			
 			sino(sino);
 			
 			break;
@@ -376,11 +321,11 @@ public class DataBase {
 		case 6:
 			System.out.println("Tipo de dato Q Moneda");
 			alerta = false;
-			float decimal = 0; 
+			float deci = 0; 
 			do{
 				try {
 					System.out.println("");
-					decimal=Float.parseFloat(captura.nextLine());
+					deci=Float.parseFloat(captura.nextLine());
 					alerta=true;
 				}catch(NumberFormatException e) {
 					System.out.println("Dato incorrecto");
@@ -389,7 +334,7 @@ public class DataBase {
 				}
 			}while(!alerta);
 			
-			decimal(decimal);
+			decimal(deci);
 		}
 		
 	}
@@ -435,7 +380,7 @@ public class DataBase {
 		}	
 	}
 	
-	private void sino(boolean sino) {
+	public void sino(boolean sino) {
 		try {
 			DataOutputStream dout = new DataOutputStream(new FileOutputStream(datos,true));
 			dout.writeBoolean(sino);
@@ -445,71 +390,60 @@ public class DataBase {
 		}		
 	}
 	
-	/*public void leeTexto() {
-		try {
-			DataInputStream dain = new DataInputStream(new FileInputStream(datos));
+	public void leerLista() {
+		pos = 0;
+		boolean fin = false;
+		RandomAccessFile raf = null;
+		
+		do {
+			System.out.println("\n");
 			try {
-				do {
-					String no = dain.readUTF();
-					System.out.println(no);
-				}while(true);
-			} catch (IOException f) {
-				//f.printStackTrace();
+				DataInputStream dain = new DataInputStream(new FileInputStream(declaracion));
+				try {
+					do {
+						n = dain.readUTF();//nombre del campo
+						d = dain.readShort();//identificador del tipo de dato
+							File f = new File(datos);
+							raf = new RandomAccessFile(f,"r");
+							raf.seek(pos);
+							try {
+								switch(d) {
+								case 1:
+									System.out.println(n+" : "+raf.readUTF());
+									pos = raf.getFilePointer();
+									break;
+								case 2:
+									System.out.println(n+" : "+raf.readInt());
+									pos = raf.getFilePointer();
+									break;
+								case 3:
+									System.out.println(n+" : "+raf.readFloat());
+									pos = raf.getFilePointer();
+									break;
+								case 4:
+									System.out.println(n+" : "+raf.readBoolean());
+									pos = raf.getFilePointer();
+									break;
+								case 5:
+									System.out.println(n+" : "+raf.readUTF());
+									pos = raf.getFilePointer();
+									break;
+								case 6:
+									System.out.println(n+" : "+"Q."+raf.readFloat());
+									pos = raf.getFilePointer();
+									break;
+								}
+							}catch(IOException ef) {
+								fin = true;
+							}
+					}while(true);
+				} catch (IOException f) {
+				}
+				dain.close();
+				raf.close();
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
-			//dain.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		} 
+		}while(!fin);
 	}
-	
-	public void leeEntero() {
-		try {
-			DataInputStream dain = new DataInputStream(new FileInputStream(datos));
-			try {
-				do {
-					int da = dain.readInt();
-					System.out.println(da);
-				}while(true);
-			} catch (IOException f) {
-				//f.printStackTrace();
-			}
-			//dain.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		} 
-	}
-	
-	public void leeDecimal() {
-		try {
-			DataInputStream dain = new DataInputStream(new FileInputStream(datos));
-			try {
-				do {
-					float da = dain.readFloat();
-					System.out.println(da);
-				}while(true);
-			} catch (IOException f) {
-				//f.printStackTrace();
-			}
-			//dain.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		} 
-	}
-	
-	public void leeSino() {
-		try {
-			DataInputStream dain = new DataInputStream(new FileInputStream(datos));
-			try {
-				do {
-					boolean da = dain.readBoolean();
-					System.out.println(da);
-				}while(true);
-			} catch (IOException f) {
-				//f.printStackTrace();
-			}
-			//dain.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		} 
-	}*/
-}
+}	
