@@ -5,16 +5,18 @@ import java.util.*;
 
 
 public class DataBase {
+	
+	
+	final static String declaracion = "definicion.txt";
+	final static String datos = "datos2.txt";//variables daniel 2
+	final static String index = "indexbase.txt";
 
-	final static String declaracion = "C:/Users/Rosy Perez/Desktop/java/definicion.txt";//variables paniagua
-	final static String datos = "C:/Users/Rosy Perez/Desktop/java/datos2.txt";
-	final static String index = "C:/Users/Rosy Perez/Desktop/java/indexbase.txt";
-	/*final static String declaracion="definicion.txt";//variable otros
-	final static String datos="datos2.txt";*/
 	
 	static Scanner captura = new Scanner(System.in);
 	File fconfig = new File(declaracion);
 	
+	int pruebas = 0;//para pruebas
+	int contador = 0;//para crear index
 	boolean alerta = false; //para determinar si es posible la iteraccion
 	String n;//se almacena el nombre del campo
 	short d;//identificador para ver configuracion
@@ -48,7 +50,8 @@ public class DataBase {
 			System.out.println("3. Buscar registro ");
 			System.out.println("4. Listar registros ");
 			System.out.println("5. Eliminar datos y/o configuracion ");
-			System.out.println("6. Salir ");
+			System.out.println("6. Ver configuracion ");
+			System.out.println("7. Salir ");
 			
 			//op=captura.nextByte();
 			do{
@@ -74,20 +77,37 @@ public class DataBase {
 				case 2://crea un nuevo registro
 					if(validarFile()) {
 						leerConfig();
+						saltoLinea();
 					}else {
 						System.out.println("Archivo de definicion no existe ");
 					}
 					break;
 				case 3:
 					if(validarFile()) {
-						
+						System.out.println("Ingrese codigo");
+						alerta = false;
+						int codigo = 0;
+						do{
+							try{
+								codigo = Integer.parseInt(captura.nextLine());
+								alerta = true;
+							}catch(NumberFormatException e){
+								System.out.println("Dato incorrecto");
+								alerta = false;
+							}
+						}while(!alerta);	
+						buscar(codigo);
 					}else {
 						System.out.println("Archivo de configuracion no existe ");
 					}
 					break;
 				case 4://listar registros almacenados
 					if(validarFile()) {
-						leerLista();
+						if(validarDatos()) {
+							leerLista();
+						}else {
+							System.out.println("No existen datos guardados ");
+						}
 					}else {
 						System.out.println("Archivo de configuracion no existe ");
 					}
@@ -100,18 +120,28 @@ public class DataBase {
 					}
 					break;
 				case 6:
+					System.out.println("\tSu configuracion es: \n");
+					printConfig();
+					break;
+				case 7:
 					System.out.println("Vulve pronto..... ");
+					break;
 				default:
 					System.out.println("Opcion no valida ");	
 			}
 			
-		}while(op!=6);
+		}while(op!=7);
 
 	}
 	
 	public boolean validarFile() {
 		File f = new File(declaracion);
 		return f.exists();
+	}
+	
+	public boolean validarDatos() {
+		File e = new File(datos);
+		return e.exists();
 	}
 	
 	public void registrarCampos() {
@@ -140,7 +170,8 @@ public class DataBase {
 			lista.clear();
 			
 			if(i==0) {
-				System.out.println("Recuerde el primer campo sera su campo clave ");
+				System.out.println("Recuerde el primer campo sera su campo clave  ");
+				System.out.println("Se recomienda usar un tipo de dato numerico \n");
 			}
 			
 			System.out.println("\n Ingrese el nombre del campo: ");
@@ -192,18 +223,90 @@ public class DataBase {
 		}
 	}
 	
-	public void leerConfig() {//lee el archivo de configuracion 
-
+	public void buscar(int codigo) {
+		
+		DataInputStream dain = null;
+		try {
+			dain = new DataInputStream(new FileInputStream(index));
+			try {
+				do {
+					int c = dain.readInt();//nombre del campo
+					long l = dain.readLong();//identificador del tipo de dato
+					//System.out.println(c);
+					//System.out.println(l);
+					
+					if(c==codigo) {
+						
+						System.out.println(c);
+						System.out.println(l);
+						buscaCodigo(l);
+					}
+				}while(true);
+			} catch (IOException f) {
+			
+			}
+			dain.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} 
+	}
+	
+	public void printConfig() {
+		int conta = 1;
 		try {
 			DataInputStream dain = new DataInputStream(new FileInputStream(declaracion));
 			try {
 				do {
 					n = dain.readUTF();//nombre del campo
 					d = dain.readShort();//identificador del tipo de dato
-					if(op==2) {// segun la opcion seleccionada en el menu principal evalua si es escribir o leer
-						System.out.print("Ingrese "+n+": ");
-						verConfig(d);//se llama la funcion para escribir se pasa el identificador d
+					System.out.print("Su campo "+conta+" es :"+n+" ");
+					conta ++;
+					switch(d) {
+					case 1:
+						System.out.println("  Tipo de dato Alfanumero");
+						break;
+					case 2:
+						System.out.println("  Tipo de dato Entero");
+						break;
+					case 3:
+						System.out.println("  Tipo de dato Decimal");
+						break;
+					case 4:
+						System.out.println("  Tipo de dato Verdadero/Falso");
+						break;
+					case 5:
+						System.out.println("  Tipo de dato Fecha dd/mm/aaaa");
+						break;
+					case 6:
+						System.out.println("  Tipo de dato Moneda Q.");
+						break;
 					}
+				}while(true);
+			} catch (IOException f) {
+			
+			}
+			dain.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void leerConfig() {//lee el archivo de configuracion 
+
+		contador = 0;
+		System.out.println("Recuerde el primer campo sera su campo clave ");
+		try {
+			DataInputStream dain = new DataInputStream(new FileInputStream(declaracion));
+			try {
+				do {
+					n = dain.readUTF();//nombre del campo
+					d = dain.readShort();//identificador del tipo de dato
+					System.out.print("Ingrese "+n+": ");
+					verConfig(d);//se llama la funcion para escribir se pasa el identificador d
+					if(contador==0) {
+						escribirIndex();
+					}
+					contador ++;
 				}while(true);
 			} catch (IOException f) {
 			
@@ -228,7 +331,6 @@ public class DataBase {
 			int entero = 0;
 			do{
 				try{
-					System.out.println("");
 					entero = Integer.parseInt(captura.nextLine());
 					alerta = true;
 				}catch(NumberFormatException e){
@@ -244,7 +346,6 @@ public class DataBase {
 			float decimal = 0;
 			do{
 				try{
-					System.out.println("");
 					decimal = Float.parseFloat(captura.nextLine());
 					alerta = true;
 				}catch(NumberFormatException e){
@@ -260,7 +361,6 @@ public class DataBase {
 			System.out.println("Ingrese tipo de F/V");
 			do {
 				String bool = captura.nextLine();
-				
 				if(bool.equals("V")||bool.equals("v")) {
 					sino = true;
 					alerta = true;
@@ -291,7 +391,7 @@ public class DataBase {
 						alerta = true;
 					}
 				}catch(NumberFormatException e) {
-					System.out.println("Dato incorrecto");
+					//System.out.println("Dato incorrecto");
 					alerta = false;
 					
 				}
@@ -303,13 +403,11 @@ public class DataBase {
 				try {
 					System.out.println("mes: ");
 					mes = Integer.parseInt(captura.nextLine());
-
 					if((mes>=1)&(mes<=12)){
 						alerta = true;
 					}
-					
 				}catch(NumberFormatException e) {
-					System.out.println("Dato incorrecto");
+					//System.out.println("Dato incorrecto");
 					alerta = false;	
 				}
 			}while(!alerta);
@@ -324,9 +422,8 @@ public class DataBase {
 						alerta = true;
 					}
 				}catch(NumberFormatException e) {
-					System.out.println("Dato incorrecto");
+					//System.out.println("Dato incorrecto");
 					alerta = false;
-					
 				}
 			}while(!alerta);
 			
@@ -398,16 +495,18 @@ public class DataBase {
 	
 	public void entero(int entero) {
 		
-		DataOutputStream dout = null;
+		RandomAccessFile raf = null;
 		try {
-			dout = new DataOutputStream(new FileOutputStream(datos,true));
-			dout.writeInt(entero);
-			dout.close();
+			raf = new RandomAccessFile(datos, "rw");
+			raf.seek(raf.length());
+			pos = raf.getFilePointer();
+			pruebas = entero;
+			raf.writeInt(entero);
 		} catch (IOException e) {		
 			e.printStackTrace();
 		}finally {
 			try {
-				dout.close();
+				raf.close();
 			} catch (IOException e) {
 				
 			}
@@ -449,7 +548,75 @@ public class DataBase {
 		}
 	}
 	
+	public void buscaCodigo(long l) {
+		
+		pos = l;
+		boolean fin = false;
+		RandomAccessFile raf = null;
+		DataInputStream dain = null;
+		
+		do {
+			System.out.println("\n");
+			try {
+				dain = new DataInputStream(new FileInputStream(declaracion));
+				try {
+					do {
+						n = dain.readUTF();//nombre del campo
+						d = dain.readShort();//identificador del tipo de dato
+							File f = new File(datos);
+							raf = new RandomAccessFile(f,"r");
+							raf.seek(pos);
+							try {
+								switch(d) {
+								case 1:
+									System.out.println(n+" : "+raf.readUTF());
+									pos = raf.getFilePointer();
+									break;
+								case 2:
+									System.out.println(n+" : "+raf.readInt());
+									pos = raf.getFilePointer();
+									break;
+								case 3:
+									System.out.println(n+" : "+raf.readFloat());
+									pos = raf.getFilePointer();
+									break;
+								case 4:
+									System.out.println(n+" : "+raf.readBoolean());
+									pos = raf.getFilePointer();
+									break;
+								case 5:
+									System.out.println(n+" : "+raf.readUTF());
+									pos = raf.getFilePointer();
+									break;
+								case 6:
+									System.out.println(n+" : "+"Q."+raf.readFloat());
+									pos = raf.getFilePointer();
+									break;
+								}
+							}catch(IOException ef) {
+								
+							}finally{
+								raf.close();
+							}
+					}while(true);
+				} catch (IOException f) {
+					//pos += 2;//prueba para leer salto de linea, si funciono
+					fin = true;
+				}	
+			} catch (IOException e) {
+				e.printStackTrace();
+			}finally{
+				try {
+					dain.close();
+				} catch (IOException e) {
+					
+				}
+			}
+		}while(!fin);
+	}
+	
 	public void leerLista() {
+		
 		pos = 0;
 		boolean fin = false;
 		RandomAccessFile raf = null;
@@ -500,7 +667,7 @@ public class DataBase {
 							}
 					}while(true);
 				} catch (IOException f) {
-				
+					pos += 2;//prueba para leer salto de linea, si funciono
 				}	
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -516,55 +683,93 @@ public class DataBase {
 	
 	public void escribirIndex() {
 		
+		DataOutputStream dout = null;
+		try {
+			dout = new DataOutputStream(new FileOutputStream(index,true));
+			dout.writeInt(pruebas);
+			dout.writeLong(pos);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+			try {
+				dout.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 	}
 	
 	public void eliminar() {
 		byte selec = 0;
 		alerta = false;
 		File f = new File(datos);
-		System.out.println("\n1. Eliminar configuracion ");
-		System.out.println("2. Eliminar datos guardados");
-		System.out.println("3. Eliminar cofiguracion y datos ");
 		
-		do{
-			try{
-				System.out.println("Ingrese su opcion ");
-				selec = Byte.parseByte(captura.nextLine());
-				alerta = true;
-			}catch(NumberFormatException e){
-				alerta = false;
-			}
-		}while(!alerta);
-		
-		switch(selec) {
-		case 1:
-			fconfig.delete();
-			System.out.println("Configuracion eliminada");
-			break;
-		case 2:	
-			//System.out.println(f.exists());
-			if(f.exists()) {
-				f.delete();
-				System.out.println("Datos guardados eliminados");
-			}else {
-				System.out.println("No hay datos guardados");
-			}
-			break;
-		case 3:
-			if(f.exists()) {
-				f.delete();
+		do {
+			System.out.println("\n\t1. Eliminar configuracion ");
+			System.out.println("\t2. Eliminar datos guardados");
+			System.out.println("\t3. Eliminar configuracion y datos ");
+			System.out.println("\t4. Regresar a menu principal");
+			
+			do{
+				try{
+					System.out.println("Ingrese su opcion ");
+					selec = Byte.parseByte(captura.nextLine());
+					alerta = true;
+				}catch(NumberFormatException e){
+					alerta = false;
+				}
+			}while(!alerta);
+			
+			
+			switch(selec) {
+			case 1:
 				fconfig.delete();
-				System.out.println("Datos y Configuracion eliminados");
-			}else {
-				fconfig.delete();
-				System.out.println("No hay datos guardados");
 				System.out.println("Configuracion eliminada");
-			}
-			break;
-		default:
-			System.out.println("Opcion incorrecta");
+				break;
+			case 2:	
+				//System.out.println(f.exists());
+				if(validarDatos()) {
+					f.delete();
+					System.out.println("Datos guardados eliminados");
+				}else {
+					System.out.println("No hay datos guardados");
+				}
+				break;
+			case 3:
+				if(validarDatos()) {
+					f.delete();
+					fconfig.delete();
+					System.out.println("Datos y Configuracion eliminados");
+				}else {
+					fconfig.delete();
+					System.out.println("No hay datos guardados");
+					System.out.println("Configuracion eliminada");
+				}
+				break;
+			case 4:
 				
-		}
+				break;
+			default:
+				System.out.println("Opcion incorrecta");
+					
+			}
+		}while(selec!=4);
+		
+	}
+	
+	public void saltoLinea() {
+		
+		//String f = "C:/Users/R&D/Desktop/java/datos2.txt";
+		try {
+			BufferedWriter bw=new BufferedWriter(new FileWriter(datos,true));
+	        bw.newLine();
+	        bw.flush();
+	        bw.close();
+		}catch(IOException e){
+	            //System.out.println("Error E/S: "+e);
+	    }
 		
 	}
 }	
