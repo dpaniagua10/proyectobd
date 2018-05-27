@@ -101,6 +101,7 @@ public class DataBase {
 					break;
 				case 6:
 					System.out.println("Vulve pronto..... ");
+					break;
 				default:
 					System.out.println("Opcion no valida ");	
 			}
