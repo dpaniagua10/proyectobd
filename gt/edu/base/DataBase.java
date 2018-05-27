@@ -7,10 +7,15 @@ import java.util.*;
 public class DataBase {
 	
 	
-	final static String declaracion = "definicion.txt";
+	/*final static String declaracion = "definicion.txt";
 	final static String datos = "datos2.txt";//variables daniel 2
 	final static String index = "indexbase.txt";
-
+	*/
+	final static String declaracion = "C:/Users/Rosy Perez/Desktop/java/definicion.txt";//variables paniagua
+	final static String datos = "C:/Users/Rosy Perez/Desktop/java/datos2.txt";
+	final static String index = "C:/Users/Rosy Perez/Desktop/java/indexbase.txt";
+	/*final static String declaracion="definicion.txt";//variable otros
+	final static String datos="datos2.txt";*/
 	
 	static Scanner captura = new Scanner(System.in);
 	File fconfig = new File(declaracion);
@@ -120,8 +125,12 @@ public class DataBase {
 					}
 					break;
 				case 6:
-					System.out.println("\tSu configuracion es: \n");
-					printConfig();
+					if(validarFile()) {
+						System.out.println("\tSu configuracion es: \n");
+						printConfig();
+					}else {
+						System.out.println("\tNo existe configuracion\n");
+					}
 					break;
 				case 7:
 					System.out.println("Vulve pronto..... ");
