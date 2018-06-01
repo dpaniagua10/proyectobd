@@ -3,62 +3,59 @@ package gt.edu.base;
 import java.io.*;
 import java.util.*;
 
-
 public class DataBase {
 	
 	
-	/*final static String declaracion = "definicion.txt";
-	final static String datos = "datos2.txt";//variables daniel 2
-	final static String index = "indexbase.txt";
-	*/
-	final static String declaracion = "C:/Users/Rosy Perez/Desktop/java/definicion.txt";//variables paniagua
-	final static String datos = "C:/Users/Rosy Perez/Desktop/java/datos2.txt";
-	final static String index = "C:/Users/Rosy Perez/Desktop/java/indexbase.txt";
-	/*final static String declaracion="definicion.txt";//variable otros
-	final static String datos="datos2.txt";*/
+	final static String entidades = "entidades.txt";//almacenar entidades y sus propiedades
+	final static String atributo = "atributos.txt";
 	
+	RandomAccessFile raf = null;
 	static Scanner captura = new Scanner(System.in);
-	File fconfig = new File(declaracion);
+	File fconfig = new File(entidades);
 	
-	int pruebas = 0;//para pruebas
-	int contador = 0;//para crear index
-	boolean alerta = false; //para determinar si es posible la iteraccion
-	String n;//se almacena el nombre del campo
-	short d;//identificador para ver configuracion
+	String guardar = null;
+	int pruebas = 0;//para index entero
+	float pruebas2 = 0;//para index decimal
+	boolean alerta = false; //para determinar si es posible el cast
 	long pos = 0; //posicion para leer datos
-	byte op;//variable de ingresar a menu principal
-	List<Valores> lista = new ArrayList<Valores>();
-	
+	byte op;//variable de ingresar a menu 
+	private List<Entidad> listEntidades = new ArrayList<>();
+
 	public static void main(String[] args) {
 		
-		DataBase principal = new DataBase();
-		principal.menu();
+		DataBase Menu = new DataBase();
+		if(Menu.validarEntidad()) {
+			Menu.listarEntidades();
+			Menu.mPrincipal();
+		}else {
+			Menu.mPrincipal();
+		}
+		
 		
 	}
 	
-	public void menu(){
+	public void mPrincipal(){
+		
 		
 		do {
 			System.out.println("\n\t Bienvenido");
 			System.out.println("\t Base de datos dinamica \n");
 			
-			if(validarFile()) {
-				System.out.println("Archivo principal ya creado ");
-				System.out.println(" ");
+			if(validarEntidad()) {
+				System.out.println("1. Registrar Entidad ");
+				System.out.println("2. Listar Entidades ");
+				System.out.println("3. Ingresar Registro");
+				System.out.println("4. Eliminar Entidad y/o Registros");
+				System.out.println("5. Salir ");
 			}else {
-				System.out.println("Archivo de configuracion, no creado ");
-				System.out.println("Seleccione 1. crear archivo de configuracion ");
+				System.out.println("\tNo ha creado ninguna Entidad ");
+				System.out.println("\tSeleccione 1. Registrar Entidad \n\n");
+				
+				System.out.println("1. Registrar Entidad ");
 			}
 			
-			System.out.println("\n1. Crear archivo de configuracion ");
-			System.out.println("2. Ingresar registro ");
-			System.out.println("3. Buscar registro ");
-			System.out.println("4. Listar registros ");
-			System.out.println("5. Eliminar datos y/o configuracion ");
-			System.out.println("6. Ver configuracion ");
-			System.out.println("7. Salir ");
 			
-			//op=captura.nextByte();
+			alerta = false;
 			do{
 				try{
 					System.out.println("Ingrese opcion");
@@ -71,139 +68,174 @@ public class DataBase {
 			}while(!alerta);
 			
 			switch(op) {
-				case 1://crea archivo de configuracion
-					System.out.println(".....");
-					if(validarFile()) {
-						System.out.println("Ocurrio un error");
-					}else {
-						registrarCampos();
+			case 1://registra entidad
+				if(validarEntidad()) {
+					agregarEntidad();
+				}else {
+					agregarEntidad();
+				}
+				break;
+			case 2://crea un nuevo registro
+				if (listEntidades.size() >=0) {
+					for (Entidad entidad : listEntidades) {
+						System.out.println("Indice: " + entidad.getIndice());
+						System.out.println("Nombre: " + entidad.getNombre());
+						System.out.println("Cantidad de atributos: " + entidad.getCantidad());
 					}
-					break;
-				case 2://crea un nuevo registro
-					if(validarFile()) {
-						leerConfig();
-						saltoLinea();
-					}else {
-						System.out.println("Archivo de definicion no existe ");
+				} else {
+					System.out.println("No hay entidades registradas");
+				}
+				break;
+			case 3:
+				int indice = 0;
+				while (indice < 1 || indice > listEntidades.size()) {
+					for (Entidad entidad : listEntidades) {
+						System.out.println(" "+entidad.getIndice() + "  ----------  " + entidad.getNombre());
 					}
-					break;
-				case 3:
-					if(validarFile()) {
-						System.out.println("Ingrese codigo");
-						alerta = false;
-						int codigo = 0;
-						do{
-							try{
-								codigo = Integer.parseInt(captura.nextLine());
-								alerta = true;
-							}catch(NumberFormatException e){
-								System.out.println("Dato incorrecto");
-								alerta = false;
-							}
-						}while(!alerta);	
-						buscar(codigo);
-					}else {
-						System.out.println("Archivo de configuracion no existe ");
-					}
-					break;
-				case 4://listar registros almacenados
-					if(validarFile()) {
-						if(validarDatos()) {
-							leerLista();
-						}else {
-							System.out.println("No existen datos guardados ");
+					alerta = false;
+					do{
+						try{
+							System.out.println("Ingrese opcion");
+							indice = Integer.parseInt(captura.nextLine());
+							alerta = true;
+						}catch(NumberFormatException e){
+							alerta = false;
 						}
-					}else {
-						System.out.println("Archivo de configuracion no existe ");
-					}
-					break;
-				case 5:
-					if(validarFile()) {
-						eliminar();
-					}else {
-						System.out.println("Archivo de configuracion no existe ");
-					}
-					break;
-				case 6:
-					if(validarFile()) {
-						System.out.println("\tSu configuracion es: \n");
-						printConfig();
-					}else {
-						System.out.println("\tNo existe configuracion\n");
-					}
-					break;
-				case 7:
-					System.out.println("Vulve pronto..... ");
-					break;
-				default:
-					System.out.println("Opcion no valida ");	
+					}while(!alerta);
+				}
+				menuRegistros(indice);
+				break;
 			}
-			
-		}while(op!=7);
+				
+		}while(op!=5);
+		
+	}
+	
+	public boolean validarEntidad() {
+		return fconfig.exists();
+	}
+	
+	public void agregarEntidad() {
+		
+		String name = null;
+		long inicio = 0;
+		int longitud = 0;
+		int cantidad = 0;
+		
+		Entidad entidad = new Entidad();
+		entidad.setIndice(listEntidades.size() + 1);
+		Valores atributos = new Valores();
 
-	}
-	
-	public boolean validarFile() {
-		File f = new File(declaracion);
-		return f.exists();
-	}
-	
-	public boolean validarDatos() {
-		File e = new File(datos);
-		return e.exists();
-	}
-	
-	public void registrarCampos() {
+		try {
+			raf = new RandomAccessFile(atributo,"rw");
+			raf.seek(raf.length());
+			inicio = raf.getFilePointer();
+		} catch (IOException e) {		
+			e.printStackTrace();
+		}finally {
+			try {
+				raf.close();
+			} catch (IOException e) {
 
-		System.out.println("Ingrese la cantidad de campos ");
-		int n = 0;
+			}
+		}
+		entidad.setInicio(inicio);
+		System.out.println("Ingrese el nombre de la entidad: ");
+		do {
+			name = captura.nextLine();
+			longitud = name.length();
+			if(longitud < 2 | longitud > 25) {
+				System.out.println("Lingitud del nombre no es valido [2-25]");
+			}else {
+				if (name.contains(" ")) {
+					System.out.println("El nombre no puede contener espacios, sustituya por guion bajo (underscore)");
+					longitud = 0;
+				}
+			}
+		}while(longitud<2 | longitud>25);
+		entidad.setNombre(name);
+		entidad.setRuta(name+".txt");
+		
+		System.out.println("Ingrese el numero de atributos de la entidad");
+		alerta = false;
 		do{
 			try{
-				System.out.println("");
-				n = Integer.parseInt(captura.nextLine());
-				if(n>=1) {
-					alerta = true;
-				}else {
-					alerta = false;
-				}
+				cantidad = Integer.parseInt(captura.nextLine());
+				alerta = true;
 			}catch(NumberFormatException e){
-				System.out.println( "Dato incorrecto");
 				alerta = false;
 			}
-		}while(!alerta);
-		
-		Valores x = new Valores();
-		
-		for(int i=0;i<n;i++) {
-			
-			lista.clear();
-			
+		}while(!alerta);				
+		entidad.setCantidad(cantidad);			
+		for(int i=0;i<cantidad;i++) {		
 			if(i==0) {
-				System.out.println("Recuerde el primer campo sera su campo clave  ");
-				System.out.println("Se recomienda usar un tipo de dato numerico \n");
+				System.out.println("\tRecuerde el primer campo sera su campo llave  ");
+				System.out.println("\tSe recomienda usar un tipo de dato numerico ");
 			}
-			
-			System.out.println("\n Ingrese el nombre del campo: ");
-			x.setNombre(captura.nextLine());
-			System.out.println("\n Seleccione tipo de dato: ");
+			System.out.println("\nIngrese el nombre del atributo No. "+(i+1)+": ");
+			do {
+				name = captura.nextLine();
+				longitud = name.length();
+				if(longitud < 2 | longitud > 25) {
+					System.out.println("Lingitud del nombre no es valido [2-25]");
+				}else {
+					if (name.contains(" ")) {
+					System.out.println("El nombre no puede contener espacios, sustituya por guion bajo (underscore)");
+						longitud = 0;
+					}
+				}			
+			}while(longitud<2 | longitud>25);
+			atributos.setNombre(name);	
+			System.out.print("\nSeleccione tipo de dato: ");
 			mostrar();
-
 			do{
 				try{
-					System.out.println("");
-					x.setDato(Short.parseShort(captura.nextLine()));
+					atributos.setDato(Short.parseShort(captura.nextLine()));
 					alerta = true;
 				}catch(NumberFormatException e){
-					System.out.println( "Dato incorrecto");
 					alerta = false;
 				}
 			}while(!alerta);
 			
-			lista.add(x);
-			
-			escribirConfig();
-		}//termina ciclo for
+			try {
+				raf = new RandomAccessFile(atributo,"rw");
+				raf.seek(raf.length());
+				raf.writeUTF(atributos.getNombre());
+				raf.writeShort(atributos.getDato());	
+			} catch (IOException e) {		
+				e.printStackTrace();
+			}finally {
+				try {
+					raf.close();
+				} catch (IOException e) {
+
+				}
+			}
+						
+		}
+		saltoLinea(atributo);
 		
+		try {
+			raf = new RandomAccessFile(entidades,"rw");
+			raf.seek(raf.length());
+			raf.writeInt(entidad.getIndice());
+			raf.writeUTF(entidad.getNombre());
+			raf.writeUTF(entidad.getRuta());
+			raf.writeInt(entidad.getCantidad());
+			raf.writeLong(entidad.getInicio());
+		}catch(IOException f) {
+			
+		}finally {
+			try {
+				raf.close();
+			} catch (IOException e) {
+
+			}
+		}
+		saltoLinea(entidades);
+		listEntidades.add(entidad);
+		System.out.println("Se guardo la siguiente entidad: ");
+		mostrarEntidad(entidad);
 	}
 	
 	public void mostrar() {
@@ -217,125 +249,371 @@ public class DataBase {
 		
 	}
 	
-	public void escribirConfig() {
+	public void mostrarEntidad(Entidad entidad) {
+		
+		System.out.println("Indice: " + entidad.getIndice());
+		System.out.println("Nombre: " + entidad.getNombre());
+		System.out.println("Cantidad de atributos: " + entidad.getCantidad());
+
+	}
+	
+	public void saltoLinea(String n) {
 		
 		try {
-			DataOutputStream dout = new DataOutputStream(new FileOutputStream(declaracion,true));
-			for (Valores x : lista) {
-				dout.writeUTF(x.getNombre());
-				dout.writeShort(x.getDato());
+			BufferedWriter bw=new BufferedWriter(new FileWriter(n,true));
+	        bw.newLine();
+	        bw.flush();
+	        bw.close();
+		}catch(IOException e){
+	            
+	    }	
+	}//
+	
+	public void listarEntidades() {
+		pos = 0;
+		int indice = 0;
+		Entidad entidad;
+		String nombre = null;
+		String ruta = null;
+		try {
+			raf = new RandomAccessFile(entidades,"rw");
+			do {
+				raf.seek(pos);
+				entidad = new Entidad();
+				indice = raf.readInt();
+				nombre = raf.readUTF();
+				ruta = raf.readUTF();
+				entidad.setIndice(indice);
+				entidad.setNombre(nombre);
+				entidad.setRuta(ruta);
+				entidad.setCantidad(raf.readInt());
+				entidad.setInicio(raf.readLong());
+				listEntidades.add(entidad);
+				pos = raf.getFilePointer()+2;
+			}while(true);
+		} catch (IOException e) {
+
+		}finally {
+			try {
+				raf.close();
+			} catch (IOException e) {
 				
 			}
-			dout.close();
-		} catch (IOException e) {		
-			e.printStackTrace();
 		}
-	}
-	
-	public void buscar(int codigo) {
-		
-		DataInputStream dain = null;
-		try {
-			dain = new DataInputStream(new FileInputStream(index));
-			try {
-				do {
-					int c = dain.readInt();//nombre del campo
-					long l = dain.readLong();//identificador del tipo de dato
-					//System.out.println(c);
-					//System.out.println(l);
-					
-					if(c==codigo) {
-						
-						System.out.println(c);
-						System.out.println(l);
-						buscaCodigo(l);
-					}
-				}while(true);
-			} catch (IOException f) {
-			
-			}
-			dain.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		} 
-	}
-	
-	public void printConfig() {
-		int conta = 1;
-		try {
-			DataInputStream dain = new DataInputStream(new FileInputStream(declaracion));
-			try {
-				do {
-					n = dain.readUTF();//nombre del campo
-					d = dain.readShort();//identificador del tipo de dato
-					System.out.print("Su campo "+conta+" es :"+n+" ");
-					conta ++;
-					switch(d) {
-					case 1:
-						System.out.println("  Tipo de dato Alfanumero");
-						break;
-					case 2:
-						System.out.println("  Tipo de dato Entero");
-						break;
-					case 3:
-						System.out.println("  Tipo de dato Decimal");
-						break;
-					case 4:
-						System.out.println("  Tipo de dato Verdadero/Falso");
-						break;
-					case 5:
-						System.out.println("  Tipo de dato Fecha dd/mm/aaaa");
-						break;
-					case 6:
-						System.out.println("  Tipo de dato Moneda Q.");
-						break;
-					}
-				}while(true);
-			} catch (IOException f) {
-			
-			}
-			dain.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-	
-	public void leerConfig() {//lee el archivo de configuracion 
 
-		contador = 0;
-		System.out.println("Recuerde el primer campo sera su campo clave ");
-		try {
-			DataInputStream dain = new DataInputStream(new FileInputStream(declaracion));
-			try {
-				do {
-					n = dain.readUTF();//nombre del campo
-					d = dain.readShort();//identificador del tipo de dato
-					System.out.print("Ingrese "+n+": ");
-					verConfig(d);//se llama la funcion para escribir se pasa el identificador d
-					if(contador==0) {
-						escribirIndex();
-					}
-					contador ++;
-				}while(true);
-			} catch (IOException f) {
-			
-			}
-			dain.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		} 
 	}
 	
-	public void verConfig(short d) {//recibe el identificador d y evalua para solcitar el dato 
+	public void menuRegistros(int n) {
+		String name = null;
+		int cantidad = 0;
+		long position = 0;//se asigna posicion pues cambia
+		long rec = 0;//almacena posicion guardad en entidads 
+		op = 0;
+		int contador = 0;//valida junto con la cantidad los atributos
+		File datos = null;
+		for (Entidad e : listEntidades) {
+			if (n == e.getIndice()) {
+				name = e.getNombre();
+				guardar = e.getRuta();
+				cantidad = e.getCantidad();
+				rec = e.getInicio();
+				break;
+			}
+		}
+		String index = "index_"+guardar;
+		DataInputStream din = null;
+		long posi = 0;
+		do {
+			System.out.println("\n\n\tEntidad: "+name);
+			System.out.println("\n1. Nuevo registro ");
+			System.out.println("2. Buscar registro ");
+			System.out.println("3. Listar registros ");
+			System.out.println("4. Eliminar datos ");
+			System.out.println("5. Ver configuracion entidad "+name);
+			System.out.println("6. Regresar a menu principal ");
+			
+			alerta = false;
+			do{
+				try{
+					System.out.println("Ingrese opcion");
+					op = Byte.parseByte(captura.nextLine());
+					alerta = true;
+				}catch(NumberFormatException e){
+					System.out.println( "Opcion incorrecta");
+					alerta = false;
+				}
+			}while(!alerta);
+			
+			switch(op) {
+			case 1://nuevo registro de entidad
+				position = rec;
+				contador = 0;
+				System.out.println("Recuerde el primer campo sera su campo llave \n");
+				try {
+					raf = new RandomAccessFile(atributo,"rw");
+					try {
+						do {
+							raf.seek(position);
+							String campo = raf.readUTF();//nombre del campo
+							short dato = raf.readShort();//identificador del tipo de dato
+							position = raf.getFilePointer();
+							System.out.print("Ingrese "+campo+": ");
+							verConfig(dato);//llamada a funcion con valor dato
+							if((contador==0)&((dato==2)|(dato==3))) {
+								System.out.println("Se creo index");
+								escribirIndex(dato);
+							}
+							contador++;
+						}while(contador<cantidad);
+					} catch (IOException f) {
+					
+					}
+				} catch (IOException e) {
+					e.printStackTrace();
+				}finally {
+					try {
+						raf.close();
+					} catch (IOException e1) {
+
+					}
+				}
+				saltoLinea(guardar);
+				break;
+			case 2://busca por campo llave
+				datos = new File("index_"+guardar);
+				position = rec;
+				posi = 0;
+				if(datos.exists()) {
+					try {
+						raf = new RandomAccessFile(atributo,"rw");
+						try {					
+							raf.seek(position);
+							String campo = raf.readUTF();//nombre del campo
+							short dato = raf.readShort();//tipo de dato
+							System.out.println("Para ejecutar la busqueda ");
+							System.out.print("Ingrese: "+campo+"\n");
+							switch(dato) {
+							case 2:
+								alerta  = false;
+								int en = 0;
+								do {
+									try {
+										en = Integer.parseInt(captura.nextLine());
+										alerta = true;
+									}catch(NumberFormatException e) {
+										alerta = false;
+									}
+								}while(!alerta);
+								int entero = 0;
+								try {
+									din = new DataInputStream(new FileInputStream(index));
+									try {
+										do {
+											entero = din.readInt();
+											posi = din.readLong();
+											if(en == entero) {
+												break;
+											}
+										}while(true);
+										din.close();
+									} catch (IOException e) {
+		
+									}
+								} catch (FileNotFoundException e) {
+									
+								}
+								leerRegistro(rec,posi,guardar);//se llama a la funcion para leer el registro completo
+								break;
+							case 3:
+								break;
+							}
+						} catch (IOException f) {
+						
+						}
+						raf.close();
+					} catch (IOException e) {
+						e.printStackTrace();
+					} 
+				}else {
+					System.out.println("No hay registros");
+				}
+				break;
+			case 3://lista registros aqui comienza
+				datos = new File(guardar);
+				RandomAccessFile raf2 = null; 
+				boolean fin = false;
+				pos = 0;
+				long leer = 0;
+				position = rec;
+				contador = 0;
+				if(datos.exists()) {
+					System.out.println("Sus registros son: ");
+					do {
+						System.out.print("\n");
+						try {
+							raf = new RandomAccessFile(atributo,"r");
+							try {
+								do {
+									raf.seek(position);
+									String no = raf.readUTF();//nombre del campo
+									short da = raf.readShort();//identificador del tipo de dato
+									position = raf.getFilePointer();
+									try {
+										raf2 = new RandomAccessFile(guardar,"r");
+										raf2.seek(leer);
+										switch(da) {
+										case 1:
+											System.out.println(no+" :  "+raf2.readUTF());
+											leer = raf2.getFilePointer();
+											break;
+										case 2:
+											System.out.println(no+" :  "+raf2.readInt());
+											leer = raf2.getFilePointer();
+											break;
+										case 3:
+											System.out.println(no+" :  "+raf2.readFloat());
+											leer = raf2.getFilePointer();
+											break;
+										case 4:
+											System.out.println(no+" :  "+raf2.readBoolean());
+											leer = raf2.getFilePointer();
+											break;
+										case 5:
+											System.out.println(no+" : "+raf2.readUTF());
+											leer = raf2.getFilePointer();
+											break;
+										case 6:
+											System.out.println(no+" : Q."+raf2.readFloat());
+											leer = raf2.getFilePointer();
+											break;
+										}
+									}catch(IOException ef){
+										fin = true;
+									}finally {
+										raf2.close();
+									}
+								}while(true);
+							} catch (IOException f) {
+								position = 0;
+								leer +=2;
+							}	
+						} catch (IOException e) {
+							e.printStackTrace();
+						}finally{
+							try {
+								raf.close();
+							} catch (IOException e) {
+								
+							}
+						}
+					}while(!fin);
+				}else {
+					System.out.println("No hay registros");
+				}
+				break;
+			case 4://elimina los registros incluyendo el index
+				datos = new File(guardar);
+				if(datos.exists()) {
+					int selec = 0;
+					String ind = "index_"+guardar;
+					File inde = new File(ind);
+					System.out.println("Presione 1, para eliminar registros/datos ");
+					System.out.println("Presione 0, para Cancelar ");
+					alerta = false;
+					do {
+						try {
+							selec = Integer.parseInt(captura.nextLine());
+							alerta = true;
+						}catch(NumberFormatException e) {
+							alerta = false;
+						}
+					}while(!alerta);
+					if(selec ==1) {
+						datos.delete();
+						inde.delete();
+					}
+				}else {
+					System.out.println("No ha ingresado registros");
+				}
+				break;
+			case 5:
+				//modificar registro
+				datos = new File("index_"+guardar);
+				position = rec;
+				posi = 0;
+				if(datos.exists()) {
+					try {
+						raf = new RandomAccessFile(atributo,"rw");
+						try {					
+							raf.seek(position);
+							String campo = raf.readUTF();//nombre del campo
+							short dato = raf.readShort();//tipo de dato
+							System.out.println("Para ejecutar la busqueda ");
+							System.out.print("Ingrese: "+campo+"\n");
+							switch(dato) {
+							case 2:
+								alerta  = false;
+								int en = 0;
+								do {
+									try {
+										en = Integer.parseInt(captura.nextLine());
+										alerta = true;
+									}catch(NumberFormatException e) {
+										alerta = false;
+									}
+								}while(!alerta);
+								int entero = 0;
+								try {
+									din = new DataInputStream(new FileInputStream(index));
+									try {
+										do {
+											entero = din.readInt();
+											posi = din.readLong();
+											if(en == entero) {
+												break;
+											}
+										}while(true);
+										din.close();
+									} catch (IOException e) {
+		
+									}
+								} catch (FileNotFoundException e) {
+									
+								}
+								leerRegistro(rec,posi,guardar);//se llama a la funcion para leer el registro completo
+								break;
+							case 3:
+								break;
+							}
+						} catch (IOException f) {
+						
+						}
+						raf.close();
+					} catch (IOException e) {
+						e.printStackTrace();
+					} 
+				}else {
+					System.out.println("No hay registros");
+				}
+				break;
+			case 6:
+				//regresa al menu principal
+				break;
+			}
+			
+		}while(op!=6);
+	}
+
+	public void verConfig(short d) {//recibe el identificador d dato y evalua para solcitar el dato 
 		
 		switch(d) {
 		case 1://		
-			System.out.println("Tipo de dato Alfanumerico");
+			System.out.println("\tTipo de dato Alfanumerico");
 			String texto = captura.nextLine();
 			texto(texto);
 			break;
 		case 2:
-			System.out.println("Tipo de dato Entero");
+			System.out.println("\tTipo de dato Entero");
 			alerta = false;
 			int entero = 0;
 			do{
@@ -343,14 +621,13 @@ public class DataBase {
 					entero = Integer.parseInt(captura.nextLine());
 					alerta = true;
 				}catch(NumberFormatException e){
-					System.out.println("Dato incorrecto");
 					alerta = false;
 				}
 			}while(!alerta);	
 			entero(entero);
 			break;
 		case 3:
-			System.out.println("Tipo de dato Decimal");
+			System.out.println("\tTipo de dato Decimal");
 			alerta = false;
 			float decimal = 0;
 			do{
@@ -358,7 +635,6 @@ public class DataBase {
 					decimal = Float.parseFloat(captura.nextLine());
 					alerta = true;
 				}catch(NumberFormatException e){
-					System.out.println( "Dato incorrecto");
 					alerta = false;
 				}
 			}while(!alerta);
@@ -367,7 +643,7 @@ public class DataBase {
 		case 4:
 			boolean sino = false;
 			alerta = false;
-			System.out.println("Ingrese tipo de F/V");
+			System.out.println("\tIngrese tipo de dato F/V ");
 			do {
 				String bool = captura.nextLine();
 				if(bool.equals("V")||bool.equals("v")) {
@@ -379,19 +655,16 @@ public class DataBase {
 				}else {
 					alerta = false;
 				}
-				
 			}while(!alerta);
 			sino(sino);
 			
 			break;
 		case 5:
-			
 			alerta = false;
 			int dia = 0;
 			int mes = 0;
 			int anio = 0;
-			System.out.println("Tipo de dato Fecha (31/12/200)");
-			
+			System.out.println("\tTipo de dato Fecha (31/12/200)");
 			do{
 				try {
 					System.out.println("dia: ");
@@ -400,14 +673,11 @@ public class DataBase {
 						alerta = true;
 					}
 				}catch(NumberFormatException e) {
-					//System.out.println("Dato incorrecto");
 					alerta = false;
-					
 				}
 			}while(!alerta);
 			
 			alerta = false;
-			
 			do{
 				try {
 					System.out.println("mes: ");
@@ -416,59 +686,51 @@ public class DataBase {
 						alerta = true;
 					}
 				}catch(NumberFormatException e) {
-					//System.out.println("Dato incorrecto");
 					alerta = false;	
 				}
 			}while(!alerta);
 			
 			alerta = false;
-			
 			do{
 				try {
-					System.out.println("anio: ");
+					System.out.println("año: ");
 					anio = Integer.parseInt(captura.nextLine());
 					if(anio>0) {
 						alerta = true;
 					}
 				}catch(NumberFormatException e) {
-					//System.out.println("Dato incorrecto");
 					alerta = false;
 				}
 			}while(!alerta);
 			
-			
 			Fecha f1 = new Fecha(dia,mes,anio);
 			String fecha = f1.toString();
-			
 			texto(fecha);
 			
 			break;
 		case 6:
-			System.out.println("Tipo de dato Q Moneda");
+			System.out.println("\tTipo de dato Q Moneda");
 			alerta = false;
 			float deci = 0; 
 			do{
 				try {
-					System.out.println("");
 					deci=Float.parseFloat(captura.nextLine());
 					alerta=true;
 				}catch(NumberFormatException e) {
-					System.out.println("Dato incorrecto");
 					alerta = false;
-					
 				}
 			}while(!alerta);
 			
 			decimal(deci);
+			break;
 		}
-		
 	}
 
 	public void fecha(String fecha) {
 		
 		DataOutputStream dout = null;
 		try {
-			dout = new DataOutputStream(new FileOutputStream(datos,true));
+			dout = new DataOutputStream(new FileOutputStream(guardar,true));
 			dout.writeUTF(fecha);
 			dout.close();
 		} catch (IOException e) {		
@@ -487,7 +749,7 @@ public class DataBase {
 		
 		DataOutputStream dout = null;
 		try {
-			dout = new DataOutputStream(new FileOutputStream(datos,true));
+			dout = new DataOutputStream(new FileOutputStream(guardar,true));
 			dout.writeUTF(texto);
 			dout.close();
 		} catch (IOException e) {		
@@ -506,7 +768,7 @@ public class DataBase {
 		
 		RandomAccessFile raf = null;
 		try {
-			raf = new RandomAccessFile(datos, "rw");
+			raf = new RandomAccessFile(guardar, "rw");
 			raf.seek(raf.length());
 			pos = raf.getFilePointer();
 			pruebas = entero;
@@ -523,16 +785,19 @@ public class DataBase {
 	}
 	
 	public void decimal(float decimal) {
-		DataOutputStream dout = null;
+		
+		RandomAccessFile raf = null;
 		try {
-			dout = new DataOutputStream(new FileOutputStream(datos,true));
-			dout.writeFloat(decimal);
-			dout.close();
+			raf = new RandomAccessFile(guardar, "rw");
+			raf.seek(raf.length());
+			pos = raf.getFilePointer();
+			pruebas2 = decimal;
+			raf.writeFloat(decimal);
 		} catch (IOException e) {		
 			e.printStackTrace();
 		}finally {
 			try {
-				dout.close();
+				raf.close();
 			} catch (IOException e) {
 				
 			}
@@ -543,7 +808,7 @@ public class DataBase {
 		
 		DataOutputStream dout = null;
 		try {
-			dout = new DataOutputStream(new FileOutputStream(datos,true));
+			dout = new DataOutputStream(new FileOutputStream(guardar,true));
 			dout.writeBoolean(sino);
 			dout.close();
 		} catch (IOException e) {		
@@ -557,228 +822,107 @@ public class DataBase {
 		}
 	}
 	
-	public void buscaCodigo(long l) {
+	public void escribirIndex(int d) {
 		
-		pos = l;
-		boolean fin = false;
-		RandomAccessFile raf = null;
-		DataInputStream dain = null;
-		
-		do {
-			System.out.println("\n");
+		DataOutputStream dout = null;
+		String index = "index_"+guardar;
+		switch(d) {
+		case 2:
 			try {
-				dain = new DataInputStream(new FileInputStream(declaracion));
+				dout = new DataOutputStream(new FileOutputStream(index,true));
+				dout.writeInt(pruebas);
+				dout.writeLong(pos);
+			} catch (IOException e) {
+				e.printStackTrace();
+			} finally {
+				try {
+					dout.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+			break;
+		case 3:
+			try {
+				dout = new DataOutputStream(new FileOutputStream(index,true));
+				dout.writeFloat(pruebas2);
+				dout.writeLong(pos);
+			} catch (IOException e) {
+				e.printStackTrace();
+			} finally {
+				try {
+					dout.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+			break;
+		}
+	}
+	
+	private void leerRegistro(long rec, long posi, String guardar) {
+		boolean fin = false;
+		RandomAccessFile raf2 = null;
+		System.out.println("Sus registro es: ");
+		do {
+			System.out.print("\n");
+			try {
+				raf = new RandomAccessFile(atributo,"r");
 				try {
 					do {
-						n = dain.readUTF();//nombre del campo
-						d = dain.readShort();//identificador del tipo de dato
-							File f = new File(datos);
-							raf = new RandomAccessFile(f,"r");
-							raf.seek(pos);
-							try {
-								switch(d) {
-								case 1:
-									System.out.println(n+" : "+raf.readUTF());
-									pos = raf.getFilePointer();
-									break;
-								case 2:
-									System.out.println(n+" : "+raf.readInt());
-									pos = raf.getFilePointer();
-									break;
-								case 3:
-									System.out.println(n+" : "+raf.readFloat());
-									pos = raf.getFilePointer();
-									break;
-								case 4:
-									System.out.println(n+" : "+raf.readBoolean());
-									pos = raf.getFilePointer();
-									break;
-								case 5:
-									System.out.println(n+" : "+raf.readUTF());
-									pos = raf.getFilePointer();
-									break;
-								case 6:
-									System.out.println(n+" : "+"Q."+raf.readFloat());
-									pos = raf.getFilePointer();
-									break;
-								}
-							}catch(IOException ef) {
-								
-							}finally{
-								raf.close();
+						raf.seek(rec);
+						String no = raf.readUTF();//nombre del campo
+						short da = raf.readShort();//identificador del tipo de dato
+						rec = raf.getFilePointer();
+						try {
+							raf2 = new RandomAccessFile(guardar,"r");
+							raf2.seek(posi);
+							switch(da) {
+							case 1:
+								System.out.println(no+" :  "+raf2.readUTF());
+								posi = raf2.getFilePointer();
+								break;
+							case 2:
+								System.out.println(no+" :  "+raf2.readInt());
+								posi = raf2.getFilePointer();
+								break;
+							case 3:
+								System.out.println(no+" :  "+raf2.readFloat());
+								posi = raf2.getFilePointer();
+								break;
+							case 4:
+								System.out.println(no+" :  "+raf2.readBoolean());
+								posi = raf2.getFilePointer();
+								break;
+							case 5:
+								System.out.println(no+" : "+raf2.readUTF());
+								posi = raf2.getFilePointer();
+								break;
+							case 6:
+								System.out.println(no+" : Q."+raf2.readFloat());
+								posi = raf2.getFilePointer();
+								break;
 							}
+						}catch(IOException ef){
+							
+						}finally {
+							raf2.close();
+						}
 					}while(true);
 				} catch (IOException f) {
-					//pos += 2;//prueba para leer salto de linea, si funciono
 					fin = true;
 				}	
 			} catch (IOException e) {
 				e.printStackTrace();
 			}finally{
 				try {
-					dain.close();
+					raf.close();
 				} catch (IOException e) {
 					
 				}
 			}
 		}while(!fin);
-	}
-	
-	public void leerLista() {
-		
-		pos = 0;
-		boolean fin = false;
-		RandomAccessFile raf = null;
-		DataInputStream dain = null;
-		
-		do {
-			System.out.println("\n");
-			try {
-				dain = new DataInputStream(new FileInputStream(declaracion));
-				try {
-					do {
-						n = dain.readUTF();//nombre del campo
-						d = dain.readShort();//identificador del tipo de dato
-							File f = new File(datos);
-							raf = new RandomAccessFile(f,"r");
-							raf.seek(pos);
-							try {
-								switch(d) {
-								case 1:
-									System.out.println(n+" : "+raf.readUTF());
-									pos = raf.getFilePointer();
-									break;
-								case 2:
-									System.out.println(n+" : "+raf.readInt());
-									pos = raf.getFilePointer();
-									break;
-								case 3:
-									System.out.println(n+" : "+raf.readFloat());
-									pos = raf.getFilePointer();
-									break;
-								case 4:
-									System.out.println(n+" : "+raf.readBoolean());
-									pos = raf.getFilePointer();
-									break;
-								case 5:
-									System.out.println(n+" : "+raf.readUTF());
-									pos = raf.getFilePointer();
-									break;
-								case 6:
-									System.out.println(n+" : "+"Q."+raf.readFloat());
-									pos = raf.getFilePointer();
-									break;
-								}
-							}catch(IOException ef) {
-								fin = true;
-							}finally{
-								raf.close();
-							}
-					}while(true);
-				} catch (IOException f) {
-					pos += 2;//prueba para leer salto de linea, si funciono
-				}	
-			} catch (IOException e) {
-				e.printStackTrace();
-			}finally{
-				try {
-					dain.close();
-				} catch (IOException e) {
-					
-				}
-			}
-		}while(!fin);
-	}
-	
-	public void escribirIndex() {
-		
-		DataOutputStream dout = null;
-		try {
-			dout = new DataOutputStream(new FileOutputStream(index,true));
-			dout.writeInt(pruebas);
-			dout.writeLong(pos);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} finally {
-			try {
-				dout.close();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-	}
-	
-	public void eliminar() {
-		byte selec = 0;
-		alerta = false;
-		File f = new File(datos);
-		
-		do {
-			System.out.println("\n\t1. Eliminar configuracion ");
-			System.out.println("\t2. Eliminar datos guardados");
-			System.out.println("\t3. Eliminar configuracion y datos ");
-			System.out.println("\t4. Regresar a menu principal");
-			
-			do{
-				try{
-					System.out.println("Ingrese su opcion ");
-					selec = Byte.parseByte(captura.nextLine());
-					alerta = true;
-				}catch(NumberFormatException e){
-					alerta = false;
-				}
-			}while(!alerta);
-			
-			
-			switch(selec) {
-			case 1:
-				fconfig.delete();
-				System.out.println("Configuracion eliminada");
-				break;
-			case 2:	
-				//System.out.println(f.exists());
-				if(validarDatos()) {
-					f.delete();
-					System.out.println("Datos guardados eliminados");
-				}else {
-					System.out.println("No hay datos guardados");
-				}
-				break;
-			case 3:
-				if(validarDatos()) {
-					f.delete();
-					fconfig.delete();
-					System.out.println("Datos y Configuracion eliminados");
-				}else {
-					fconfig.delete();
-					System.out.println("No hay datos guardados");
-					System.out.println("Configuracion eliminada");
-				}
-				break;
-			case 4:
-				
-				break;
-			default:
-				System.out.println("Opcion incorrecta");
-					
-			}
-		}while(selec!=4);
 		
 	}
 	
-	public void saltoLinea() {
-		
-		//String f = "C:/Users/R&D/Desktop/java/datos2.txt";
-		try {
-			BufferedWriter bw=new BufferedWriter(new FileWriter(datos,true));
-	        bw.newLine();
-	        bw.flush();
-	        bw.close();
-		}catch(IOException e){
-	            //System.out.println("Error E/S: "+e);
-	    }
-		
-	}
 }	

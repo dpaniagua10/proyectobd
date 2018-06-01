@@ -3,7 +3,7 @@ package gt.edu.base;
 public class Valores {
 	
 	private String nombre; //nombre campo
-	private short dato;
+	private short dato;//identificador de tipo de dato
 	
 	public String getNombre() {
 		return nombre;
